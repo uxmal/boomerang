@@ -3,7 +3,13 @@
 /** \file ElfTypes.h
  * \brief This file contains the elf format support structures
 */
+#ifdef __GNUC__ 
 #define PACKED __attribute__((packed))
+#endif
+// TODO: resolve the PACKED keyword
+#ifdef MSVC
+#define PACKED		
+#endif
 
 // Internal elf info
 typedef struct {

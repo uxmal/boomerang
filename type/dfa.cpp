@@ -1254,7 +1254,7 @@ void RefExp::descendType(SharedType parentType, bool &ch, Instruction *s) {
     subExp1->descendType(newType, ch, s);
 }
 
-void Const::descendType(SharedType parentType, bool &ch, Instruction */*s*/) {
+void Const::descendType(SharedType parentType, bool &ch, Instruction * /*s*/) {
     bool thisCh = false;
     type = type->meetWith(parentType, thisCh);
     ch |= thisCh;
@@ -1368,9 +1368,9 @@ void Ternary::descendType(SharedType /*parentType*/, bool &ch, Instruction *s) {
     }
 }
 
-void TypedExp::descendType(SharedType /*parentType*/, bool &/*ch*/, Instruction */*s*/) {}
+void TypedExp::descendType(SharedType /*parentType*/, bool &/*ch*/, Instruction * /*s*/) {}
 
-void Terminal::descendType(SharedType /*parentType*/, bool &/*ch*/, Instruction */*s*/) {}
+void Terminal::descendType(SharedType /*parentType*/, bool &/*ch*/, Instruction * /*s*/) {}
 //! Data flow based type analysis.
 //! Meet the parameters with their current types.
 //! \returns true if a change
