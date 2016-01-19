@@ -103,7 +103,7 @@ TypedExp::TypedExp(TypedExp &o) : Unary(opTypedExp) {
     type = o.type->clone();
 }
 
-FlagDef::FlagDef(Exp *params, RTL *rtl) : Unary(opFlagDef, params), rtl(rtl) {}
+FlagDef::FlagDef(Exp *params, SharedRTL rtl) : Unary(opFlagDef, params), rtl(rtl) {}
 
 RefExp::RefExp(Exp *e, Instruction *d) : Unary(opSubscript, e), def(d) { assert(e); }
 
@@ -417,6 +417,7 @@ bool RefExp::operator==(const Exp &o) const {
     // Allow a def of (Statement*)-1 as a wild card
     if ((long)def == -1)
         return true;
+    assert(dynamic_cast<const RefExp *>(&o)!=nullptr);
     // Allow a def of nullptr to match a def of an implicit assignment
     if ((long)((RefExp &)o).def == -1)
         return true;
@@ -2228,8 +2229,7 @@ Exp *Exp::Accumulate(std::list<Exp *> exprs) {
       *unification.
       * We're trying to do it with a simple iterative algorithm, but the algorithm keeps getting more and more complex.
       * Eventually I will replace this with a simple theorem prover and we'll have something powerful, but until then,
-      *dont
-      * rely on this code to do anything critical. - trent 8/7/2002
+      * dont rely on this code to do anything critical. - trent 8/7/2002
       ******************************************************************************/
 #define DEBUG_SIMP 0                                                              // Set to 1 to print every change
 Exp *Exp::simplify() {
@@ -2388,7 +2388,42 @@ Exp *Unary::polySimplify(bool &bMod) {
 
     return res;
 }
+Exp * accessMember(Exp *parent,const std::shared_ptr<CompoundType> &c,int n) {
+    unsigned r = c->getOffsetRemainder(n * 8);
+    QString nam = c->getNameAtOffset(n * 8);
+    SharedType t = c->getTypeAtOffset(n * 8);
+    Exp *res = Binary::get(opMemberAccess, parent, Const::get(nam));
+    assert((r % 8) == 0);
+    if(t->resolvesToCompound()) {
+        res = accessMember(res,t->asCompound(),r/8);
+    } else if(t->resolvesToPointer() && t->asPointer()->getPointsTo()->resolvesToCompound()) {
+        if(r!=0)
+            assert(false);
+    } else if(t->resolvesToArray()) {
+        std::shared_ptr<ArrayType> a = t->asArray();
+        SharedType array_member_type = a->getBaseType();
+        int b  = array_member_type->getSize() / 8;
+        int br = array_member_type->getSize() % 8;
+        assert(br==0);
+        res = Binary::get(opArrayIndex, res,Const::get(n/b));
+        if(array_member_type->resolvesToCompound()) {
+            res = accessMember(res,array_member_type->asCompound(),n%b);
+        }
 
+    }
+    return res;
+
+}
+Exp * convertFromOffsetToCompound(Exp *parent,std::shared_ptr<CompoundType> &c,int n) {
+    if (n * 8 >= c->getSize())
+        return nullptr;
+    QString nam = c->getNameAtOffset(n * 8);
+    if ( !nam.isNull() && nam != "pad") {
+        Exp *l = Location::memOf(parent);
+        return new Unary(opAddrOf, accessMember(l,c,n));
+    }
+    return nullptr;
+}
 Exp *Binary::polySimplify(bool &bMod) {
     assert(subExp1 && subExp2);
 
@@ -2917,19 +2952,11 @@ Exp *Binary::polySimplify(bool &bMod) {
         opSub2 == opIntConst) {
         unsigned n = (unsigned)((Const *)subExp2)->getInt();
         std::shared_ptr<CompoundType> c = ty->asPointer()->getPointsTo()->asCompound();
-        if (n * 8 < c->getSize()) {
-            unsigned r = c->getOffsetRemainder(n * 8);
-            assert((r % 8) == 0);
-            QString nam = c->getNameAtOffset(n * 8);
-            if ( !nam.isNull() && nam != "pad") {
-                Exp *l = Location::memOf(subExp1);
-                // l->setType(c);
-                res = Binary::get(opPlus, new Unary(opAddrOf, Binary::get(opMemberAccess, l, Const::get(nam))),
-                                  new Const((int)r / 8));
+        res = convertFromOffsetToCompound(subExp1,c,n);
+        if(res) {
                 LOG_VERBOSE(1) << "(trans1) replacing " << this << " with " << res << "\n";
                 bMod = true;
                 return res;
-            }
         }
     }
 
@@ -3228,7 +3255,7 @@ Exp *RefExp::polySimplify(bool &bMod) {
      * procedure.
          */
     if (subExp1->getOper() == opDF && def == nullptr) {
-        res = new Const(0);
+        res = Const::get(int(0));
         bMod = true;
         return res;
     }
@@ -4004,12 +4031,19 @@ Exp *Binary::accept(ExpModifier *v) {
     assert(subExp1 && subExp2);
 
     bool recur;
-    Binary *ret = (Binary *)v->preVisit(this, recur);
+    Exp *ret = v->preVisit(this, recur);
     if (recur)
         subExp1 = subExp1->accept(v);
     if (recur)
         subExp2 = subExp2->accept(v);
-    return v->postVisit(ret);
+    Binary *bret = dynamic_cast<Binary *>(ret);
+    Unary *uret = dynamic_cast<Unary *>(ret);
+    if(bret)
+        return v->postVisit(bret);
+    if(uret)
+        return v->postVisit(uret);
+    Q_ASSERT(false);
+    return nullptr;
 }
 Exp *Ternary::accept(ExpModifier *v) {
     bool recur;
@@ -4027,10 +4061,17 @@ Exp *Location::accept(ExpModifier *v) {
     // This looks to be the same source code as Unary::accept, but the type of "this" is different, which is all
     // important here!  (it makes a call to a different visitor member function).
     bool recur;
-    Location *ret = (Location *)v->preVisit(this, recur);
+    Exp *ret = v->preVisit(this, recur);
     if (recur)
         subExp1 = subExp1->accept(v);
-    return v->postVisit(ret);
+    Location * loc_ret = dynamic_cast<Location *>(ret);
+    if(loc_ret)
+        return v->postVisit(loc_ret);
+    RefExp * ref_ret = dynamic_cast<RefExp *>(ret);
+    if(ref_ret)
+        return v->postVisit(ref_ret);
+    assert(false);
+    return nullptr;
 }
 
 Exp *RefExp::accept(ExpModifier *v) {
@@ -4059,7 +4100,16 @@ Exp *TypedExp::accept(ExpModifier *v) {
 
 Exp *Terminal::accept(ExpModifier *v) {
     // This is important if we need to modify terminals
-    return v->postVisit((Terminal *)v->preVisit(this));
+    Exp *val = v->preVisit(this);
+    Terminal *term_res = dynamic_cast<Terminal *>(val);
+    if(term_res)
+        return v->postVisit(term_res);
+
+    RefExp *ref_res = dynamic_cast<RefExp *>(val);
+    if(ref_res)
+        return v->postVisit(ref_res);
+    assert(false);
+    return nullptr;
 }
 
 Exp *Const::accept(ExpModifier *v) { return v->postVisit((Const *)v->preVisit(this)); }
