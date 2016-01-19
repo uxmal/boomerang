@@ -49,16 +49,16 @@ NJMCDecoder::NJMCDecoder(Prog *prg) : prog(prg),Image(Boomerang::get()->getImage
   * \param   ... - Semantic String ptrs representing actual operands
   * \returns an instantiated list of Exps
   ******************************************************************************/
-std::list<Instruction *> *NJMCDecoder::instantiate(ADDRESS pc, const char *name, ...) {
+std::list<Instruction *> *NJMCDecoder::instantiate(ADDRESS pc, const char * format, ...) {
     // Get the signature of the instruction and extract its parts
-    std::pair<QString, unsigned> sig = RTLDict.getSignature(name);
+    std::pair<QString, unsigned> sig = RTLDict.getSignature(format);
     QString opcode = sig.first;
     unsigned numOperands = sig.second;
 
     // Put the operands into a vector
     std::vector<Exp *> actuals(numOperands);
     va_list args;
-    va_start(args, name);
+    va_start(args, format);
     for (unsigned i = 0; i < numOperands; i++)
         actuals[i] = va_arg(args, Exp *);
     va_end(args);
@@ -66,7 +66,7 @@ std::list<Instruction *> *NJMCDecoder::instantiate(ADDRESS pc, const char *name,
     if (DEBUG_DECODER) {
         QTextStream q_cout(stdout);
         // Display a disassembly of this instruction if requested
-        q_cout << pc << ": " << name << " ";
+        q_cout << pc << ": " << format << " ";
         for (std::vector<Exp *>::iterator itd = actuals.begin(); itd != actuals.end(); itd++) {
             if ((*itd)->isIntConst()) {
                 int val = ((Const *)(*itd))->getInt();
@@ -132,10 +132,10 @@ Exp *NJMCDecoder::instantiateNamedParam(char *name, ...) {
   * \param   ... - Exp* representing actual operands
   * \returns an instantiated list of Exps
   ******************************************************************************/
-void NJMCDecoder::substituteCallArgs(char *name, Exp *&exp, ...) {
+Exp * NJMCDecoder::substituteCallArgs(char *name, Exp * exp, ...) {
     if (RTLDict.ParamSet.find(name) == RTLDict.ParamSet.end()) {
         LOG_STREAM() << "No entry for named parameter '" << name << "'\n";
-        return;
+        return exp;
     }
     ParamEntry &ent = RTLDict.DetParamMap[name];
     /*if (ent.kind != PARAM_ASGN && ent.kind != PARAM_LAMBDA) {
@@ -151,6 +151,7 @@ void NJMCDecoder::substituteCallArgs(char *name, Exp *&exp, ...) {
         bool change;
         exp = exp->searchReplaceAll(formal, actual, change);
     }
+	return exp;
 }
 
 /***************************************************************************/ /**

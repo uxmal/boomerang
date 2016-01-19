@@ -1651,7 +1651,7 @@ void BasicBlock::getLiveOut(LocationSet &liveout, LocationSet &phiLocs) {
  * Get the index of my in-edges is BB pred
  */
 int BasicBlock::whichPred(BasicBlock *pred) {
-    int n = InEdges.size();
+    auto n = InEdges.size();
     for (int i = 0; i < n; i++) {
         if (InEdges[i] == pred)
             return i;
@@ -2206,7 +2206,7 @@ void BasicBlock::processSwitch(UserProc *proc) {
         LOG << "lo= " << si->iLower << ", hi= " << si->iUpper << "\n";
     }
     ADDRESS uSwitch;
-    int iNumOut, iNum;
+    size_t iNumOut, iNum;
     iNumOut = si->iUpper - si->iLower + 1;
     iNum = iNumOut;
     // Emit an NWAY BB instead of the COMPJUMP. Also update the number of out edges.

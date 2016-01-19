@@ -98,27 +98,27 @@ class StmtVisitorStub : public StmtVisitor {
     void clear() { a = b = c = d = e = f = g = h = false; }
     StmtVisitorStub() { clear(); }
     virtual ~StmtVisitorStub() {}
-    virtual bool visit(RTL */*s*/) {
+    virtual bool visit(RTL * /*s*/) {
         a = true;
         return false;
     }
-    virtual bool visit(GotoStatement */*s*/) {
+    virtual bool visit(GotoStatement * /*s*/) {
         b = true;
         return false;
     }
-    virtual bool visit(BranchStatement */*s*/) {
+    virtual bool visit(BranchStatement * /*s*/) {
         c = true;
         return false;
     }
-    virtual bool visit(CaseStatement */*s*/) {
+    virtual bool visit(CaseStatement * /*s*/) {
         d = true;
         return false;
     }
-    virtual bool visit(CallStatement */*s*/) {
+    virtual bool visit(CallStatement * /*s*/) {
         e = true;
         return false;
     }
-    virtual bool visit(ReturnStatement */*s*/) {
+    virtual bool visit(ReturnStatement * /*s*/) {
         f = true;
         return false;
     }
@@ -126,7 +126,7 @@ class StmtVisitorStub : public StmtVisitor {
         g = true;
         return false;
     }
-    virtual bool visit(Assign */*s*/) {
+    virtual bool visit(Assign * /*s*/) {
         h = true;
         return false;
     }

@@ -76,12 +76,11 @@ void LoaderTest::testSparcLoad() {
     BinaryFileFactory bff;
     QObject *pBF = bff.Load(HELLO_SPARC);
     QVERIFY(pBF != nullptr);
-    int n;
     const IBinarySection *si;
     IBinaryImage *sect_iface = Boomerang::get()->getImage();
     QVERIFY(sect_iface!=nullptr);
 
-    n = sect_iface->GetNumSections();
+    auto n = sect_iface->GetNumSections();
     ost << "Number of sections = " << n << "\r\n\t";
     // Just use the first (real one) and last sections
     si = sect_iface->GetSectionInfo(1);
@@ -110,9 +109,8 @@ void LoaderTest::testPentiumLoad() {
     QVERIFY(pBF != nullptr);
     IBinaryImage *sect_iface = Boomerang::get()->getImage();
     QVERIFY(sect_iface!=nullptr);
-    int n;
     const IBinarySection *si;
-    n = sect_iface->GetNumSections();
+    auto n = sect_iface->GetNumSections();
     ost << "Number of sections = " << n << "\r\n\t";
     si = sect_iface->GetSectionInfo(1);
     ost << si->getName() << "\t";
@@ -142,9 +140,8 @@ void LoaderTest::testHppaLoad() {
     QVERIFY(pBF != nullptr);
     IBinaryImage *sect_iface = Boomerang::get()->getImage();
     QVERIFY(sect_iface!=nullptr);
-    int n;
     const IBinarySection *si;
-    n = sect_iface->GetNumSections();
+    auto n = sect_iface->GetNumSections();
     ost << "Number of sections = " << n << "\r\n";
     for (int i = 0; i < n; i++) {
         si = sect_iface->GetSectionInfo(i);
@@ -172,9 +169,8 @@ void LoaderTest::testPalmLoad() {
     QVERIFY(pBF != nullptr);
     IBinaryImage *sect_iface = Boomerang::get()->getImage();
     QVERIFY(sect_iface!=nullptr);
-    int n;
     const IBinarySection *si;
-    n = sect_iface->GetNumSections();
+    auto n = sect_iface->GetNumSections();
     ost << "Number of sections = " << n << "\r\n";
     for (int i = 0; i < n; i++) {
         si = sect_iface->GetSectionInfo(i);

@@ -1,6 +1,6 @@
 #if defined(_WIN32) && !defined(__MINGW32__)
 #include <Windows.h>
-#include <DbgHelp.h>
+// #include <DbgHelp.h>
 #endif
 
 #include "module.h"

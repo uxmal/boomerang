@@ -491,7 +491,7 @@ private:
             return tgt->getRanges(b);
         return tgt->getBranchRange(b);
     }
-    void limitOutputWithCondition(BranchStatement */*stmt*/,RangeMap &output, Exp *e) {
+    void limitOutputWithCondition(BranchStatement * /*stmt*/,RangeMap &output, Exp *e) {
         assert(e);
         if (!output.hasRange(e->getSubExp1()))
             return;

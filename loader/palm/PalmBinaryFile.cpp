@@ -281,7 +281,7 @@ void PalmBinaryFile::Close() {
     // Not implemented yet
     return;
 }
-bool PalmBinaryFile::PostLoad(void */*handle*/) {
+bool PalmBinaryFile::PostLoad(void * /*handle*/) {
     // Not needed: for archives only
     return false;
 }

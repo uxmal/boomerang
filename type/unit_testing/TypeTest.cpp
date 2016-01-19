@@ -175,8 +175,8 @@ void TypeTest::testDataInterval() {
     dim.addItem(ADDRESS::g(0x1010), "struct1", ct);
 
     ComplexTypeCompList &ctcl = ct->compForAddress(ADDRESS::g(0x1012), dim);
-    unsigned ua = ctcl.size();
-    unsigned ue = 1;
+    size_t ua = ctcl.size();
+    size_t ue = 1;
     QCOMPARE(ua,ue);
     ComplexTypeComp &ctc = ctcl.front();
     ue = 0;

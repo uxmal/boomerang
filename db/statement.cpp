@@ -37,6 +37,9 @@
 extern char debug_buffer[]; // For prints functions
 extern QTextStream &alignStream(QTextStream &str,int align);
 
+Assign const Instruction::wildcard;
+
+
 void Instruction::setProc(UserProc *p) {
     proc = p;
     LocationSet exps;

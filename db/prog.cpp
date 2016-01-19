@@ -58,9 +58,12 @@
 #ifdef _WIN32
 #undef NO_ADDRESS
 #include <windows.h>
-#ifndef __MINGW32__
+#ifndef  __MINGW32__
 namespace dbghelp {
+#if 0
+	// The type ADDRESS in <dbghelp.h> conflicts with the ADDRESS in "types.h"
 #include <dbghelp.h>
+#endif
 };
 #endif
 #undef NO_ADDRESS
@@ -183,7 +186,7 @@ void Prog::generateDataSectionCode(QString section_name, ADDRESS section_start, 
     code->AddGlobal("start_" + section_name, IntegerType::get(32, -1), new Const(section_start));
     code->AddGlobal(section_name + "_size", IntegerType::get(32, -1), new Const(size ? size : (unsigned int)-1));
     Exp *l = new Terminal(opNil);
-    for (unsigned int i = 0; i < size; i++) {
+    for (size_t i = 0; i < size; i++) {
         int n = Image->readNative1(section_start + size - 1 - i);
         if (n < 0)
             n = 256 + n;
@@ -445,7 +448,7 @@ Function *Prog::setNewProc(ADDRESS uAddr) {
     return pProc;
 }
 
-#if defined(_WIN32) && !defined(__MINGW32__)
+#if 0 && defined(_WIN32) && !defined(__MINGW32__)
 
 SharedType typeFromDebugInfo(int index, DWORD64 ModBase);
 
@@ -768,7 +771,7 @@ std::shared_ptr<ArrayType> Prog::makeArrayType(ADDRESS u, SharedType t) {
 }
 //! Guess a global's type based on its name and address
 SharedType Prog::guessGlobalType(const QString &nam, ADDRESS u) {
-#if defined(_WIN32) && !defined(__MINGW32__)
+#if 0 && defined(_WIN32) && !defined(__MINGW32__)
     HANDLE hProcess = GetCurrentProcess();
     dbghelp::SYMBOL_INFO *sym = (dbghelp::SYMBOL_INFO *)malloc(sizeof(dbghelp::SYMBOL_INFO) + 1000);
     sym->SizeOfStruct = sizeof(*sym);

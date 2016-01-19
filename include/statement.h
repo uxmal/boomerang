@@ -314,6 +314,10 @@ public:
     bool calcMayAlias(Exp *e1, Exp *e2, int size);
     bool mayAlias(Exp *e1, Exp *e2, int size);
 
+	// REVIEW: instead of casting Instruction to -1, use a pointer to 
+	// the 'wildcard' static member to indicate wildcard-ness.
+	static Assign const wildcard;
+
     friend class XMLProgParser;
 }; // class Statement
 
@@ -907,10 +911,10 @@ public:
 struct SWITCH_INFO {
     Exp *pSwitchVar; // Ptr to Exp repres switch var, e.g. v[7]
     char chForm;     // Switch form: 'A', 'O', 'R', 'H', or 'F' etc
-    int iLower;      // Lower bound of the switch variable
-    int iUpper;      // Upper bound for the switch variable
+	size_t iLower;      // Lower bound of the switch variable
+    size_t iUpper;      // Upper bound for the switch variable
     ADDRESS uTable;  // Native address of the table, or ptr to array of values for form F
-    int iNumTable;   // Number of entries in the table (form H only)
+    size_t iNumTable;   // Number of entries in the table (form H only)
     int iOffset = 0; // Distance from jump to table (form R only)
     // int        delta;            // Host address - Native address
 };
