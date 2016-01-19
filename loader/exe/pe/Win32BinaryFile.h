@@ -43,7 +43,15 @@ typedef struct {/* exe file header, just the signature really */
     Byte sigHi;
 } Header;
 
+#ifdef __GNUC__
 #define PACKED __attribute__((packed))
+#else
+#define PACKED
+#endif
+
+#ifdef MSVC
+#include "pshpack1.h"
+#endif
 
 typedef struct PACKED {
     Byte sigLo;

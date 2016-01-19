@@ -39,7 +39,13 @@
     ((unsigned)((Byte *)(x))[3] << 24))
 #define LMMHw(x) ((unsigned)((Byte *)(&x))[0] + ((unsigned)((Byte *)(&x))[1] << 8))
 
+#ifdef __GNUC__
 #define PACKED __attribute__((packed))
+#else
+// TODO: what to do with PACKED?
+#define PACKED
+#endif
+
 
 typedef struct {/* exe file header, just the signature really */
     Byte sigLo; /* .EXE signature: 0x4D 0x5A     */

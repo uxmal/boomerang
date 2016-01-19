@@ -1,9 +1,15 @@
+#if defined(_WIN32) && !defined(__MINGW32__)
+#include <Windows.h>
+#include <DbgHelp.h>
+#endif
+
 #include "module.h"
 
 #include "boomerang.h"
 #include "proc.h"
 #include "prog.h"
 
+#include <iostream>
 #include <QDir>
 #include <QString>
 
@@ -159,10 +165,11 @@ Function *Module::getOrInsertFunction(const QString &name, ADDRESS uNative, bool
     // alert the watchers of a new proc
     emit newFunction(pProc);
     Boomerang::get()->alertNew(pProc);
+
     // TODO: add platform agnostic way of using debug information, should be moved to Loaders, Prog should just collect info
     // from Loader
 
-#if defined(_WIN32) && !defined(__MINGW32__)
+#if 0 && defined(_WIN32) && !defined(__MINGW32__)
     if (isWin32()) {
         // use debugging information
         HANDLE hProcess = GetCurrentProcess();

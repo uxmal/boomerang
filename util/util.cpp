@@ -23,7 +23,11 @@
 #include <QTextStream>
 #include <cassert>
 #include <string>
+#ifdef __GNUC__
 #include <unistd.h>
+#else
+#include <io.h>
+#endif
 #include <fcntl.h>
 
 int lockFileWrite(const char *fname) {

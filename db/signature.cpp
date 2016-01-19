@@ -266,14 +266,14 @@ CallingConvention::Win32TcSignature::Win32TcSignature(const QString &nam) : Win3
 CallingConvention::Win32TcSignature::Win32TcSignature(Signature &old) : Win32Signature(old) {}
 
 static void cloneVec(std::vector<Parameter *> &from, std::vector<Parameter *> &to) {
-    unsigned n = from.size();
+    size_t n = from.size();
     to.resize(n);
     for (unsigned i = 0; i < n; i++)
         to[i] = from[i]->clone();
 }
 
 static void cloneVec(Returns &from, Returns &to) {
-    unsigned n = from.size();
+    size_t n = from.size();
     to.resize(n);
     for (unsigned i = 0; i < n; i++)
         to[i] = from[i]->clone();
@@ -476,7 +476,7 @@ void CallingConvention::Win32Signature::setLibraryDefines(StatementList *defs) {
 Exp *CallingConvention::Win32TcSignature::getProven(Exp *left) {
     if (left->isRegOfK()) {
         if (((Const *)left->getSubExp1())->getInt() == 28) {
-            int nparams = params.size();
+            size_t nparams = params.size();
             if (nparams > 0 && *params[0]->getExp() == *Location::regOf(28)) {
                 nparams--;
             }

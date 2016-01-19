@@ -87,7 +87,7 @@
 #include <windows.h>
 #ifndef __MINGW32__
 namespace dbghelp {
-#include <dbghelp.h>
+// #include <dbghelp.h>
 };
 #endif
 #undef NO_ADDRESS
@@ -124,7 +124,7 @@ void Function::eraseFromParent()
   *
   ******************************************************************************/
 Function::Function(ADDRESS uNative, Signature *sig, Module *mod)
-    : signature(sig), address(uNative), m_firstCaller(nullptr),Parent(mod) {
+    : signature(sig), address(uNative), m_firstCaller(0),Parent(mod) {
     assert(mod);
     prog = mod->getParent();
 }
@@ -203,7 +203,7 @@ bool UserProc::isNoReturn() {
         return true;
     if (exitbb->getNumInEdges() == 1) {
         Instruction *s = exitbb->getInEdges()[0]->getLastStmt();
-        if(not s->isCall())
+        if(!s->isCall())
             return false;
         CallStatement *call = (CallStatement *)s;
         if (call->getDestProc() && call->getDestProc()->isNoReturn())

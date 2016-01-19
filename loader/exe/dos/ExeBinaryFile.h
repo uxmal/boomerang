@@ -23,7 +23,13 @@
 #define __EXEBINARYFILE_H__
 
 #include "BinaryFile.h"
+#ifdef __GNUC__
 #define PACKED __attribute__((packed))
+#else
+//TODO how do do packed structures in VC? #pragma align(1)?
+#define PACKED 
+#endif
+
 typedef struct PACKED { /*        PSP structure                 */
     SWord int20h;       /* interrupt 20h                        */
     SWord eof;          /* segment, end of allocation block     */
