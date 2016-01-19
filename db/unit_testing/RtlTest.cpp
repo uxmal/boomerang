@@ -122,7 +122,7 @@ class StmtVisitorStub : public StmtVisitor {
         f = true;
         return false;
     }
-    virtual bool visit(BoolAssign */*s*/) {
+    virtual bool visit(BoolAssign * /*s*/) {
         g = true;
         return false;
     }
